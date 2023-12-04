@@ -22,6 +22,7 @@ public class SearchLetterService
 								select wuc.chosen_user_telegram_id 
 								from app.user_choice wuc 
 								where wuc.user_telegram_id = {0}
+								and wuc.deleted_at is null
 							)
 							select  
 								uf.*
