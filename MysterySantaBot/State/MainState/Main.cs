@@ -118,7 +118,10 @@ public partial class Main : BaseMysterySantaState
         
         var data = await GetDataForLetter(userForm, false);
 
-        var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, userForm.UserTelegramId, choiceListCount, isAddingButton);
+        var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, userForm.UserTelegramId, 
+            choiceListCount, 
+            await HasChatExisted(BotClient, userForm.UserTelegramId),
+            isAddingButton);
         
         await BotClient.SendPhotoAsync(Chat.ChatId, data.photo, data.caption,
             ParseMode.Html, 
@@ -134,21 +137,24 @@ public partial class Main : BaseMysterySantaState
             await Answer(r.NotFoundLetters);
             return;
         }
-            
+
         await ShowLetter(candidate);
     }
     
     private async Task ShowLetter(UserForm userForm, bool removeInline = false)
     {
         var data = await GetDataForLetter(userForm, removeInline);
-        var inline = data.inline
+        
+        data.inline
             .NewRow()
             .Add(r.Like, MainRes.InlineLikeLetter + userForm.UserTelegramId)
             .Add(r.Dislike, MainRes.InlineDislikeLetter + userForm.UserTelegramId);
+
+        
         
         await BotClient.SendPhotoAsync(Chat.ChatId, data.photo, data.caption,
             ParseMode.Html, 
-            replyMarkup: removeInline == false ? inline.Build() : default);
+            replyMarkup: removeInline == false ? data.inline.Build() : default);
         await UpdateLastShownTime(userForm.UserTelegramId);
     }
 
@@ -174,7 +180,8 @@ public partial class Main : BaseMysterySantaState
 
         sb.AppendLine($"{r.Like} <b>{marks.Like}</b> {r.Dislike} <b>{marks.Dislike}</b>");
         
-        MarkupBuilder<InlineKeyboardMarkup> inline = r.GetInlineUnderLetterForUser(User, UserClaims, userForm.UserTelegramId,true, hideChoiceButton);
+        MarkupBuilder<InlineKeyboardMarkup> inline = r.GetInlineUnderLetterForUser(User, UserClaims, userForm.UserTelegramId,
+            await HasChatExisted(BotClient, userForm.UserTelegramId),true, hideChoiceButton);
 
         return (iof, sb.ToString(), inline);
     }
@@ -235,5 +242,20 @@ public partial class Main : BaseMysterySantaState
         await ChangeState(nameof(SetName));
         await Answer(r.EditLetter);
         await SetName.Introduce(BotClient, me, Chat.ChatId, R.SetNameState);
+    }
+
+    public static async Task<bool> HasChatExisted(ITelegramBotClient client, long chatId)
+    {
+        try
+        {
+            var chat = await client.GetChatAsync(chatId);
+            if (chat != null) return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        return false;
     }
 }

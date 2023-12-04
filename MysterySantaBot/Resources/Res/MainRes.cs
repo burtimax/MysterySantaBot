@@ -98,7 +98,7 @@ public class MainRes
     /// <param name="letterUserForm">Письмо.</param>
     /// <returns></returns>
     public MarkupBuilder<InlineKeyboardMarkup> GetInlineUnderLetterForUser(BotUser user,
-        IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, bool isAddingButton = true,
+        IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, bool chatHasExisted, bool isAddingButton = true,
         bool hideChoiceButton = false)
     {
         MarkupBuilder<InlineKeyboardMarkup> inline = new();
@@ -107,11 +107,16 @@ public class MainRes
         {
             inline.NewRow()
                 .Add(AllowLetterByModerator, InlineAllowLetter + letterUserTelegramId)
-                .Add(ForbidLetterByModerator, InlineForbidLetter + letterUserTelegramId)
-                .NewRow()
-                .Add(ButtonLinkToPrivateMessage, url: string.Format(AppConstants.UserPrivateMessageLinkFormat, letterUserTelegramId.ToString()));
-        }
+                .Add(ForbidLetterByModerator, InlineForbidLetter + letterUserTelegramId);
 
+            if (chatHasExisted)
+            {
+                inline.NewRow()
+                    .Add(ButtonLinkToPrivateMessage,
+                        url: string.Format(AppConstants.UserPrivateMessageLinkFormat, letterUserTelegramId.ToString()));
+            }
+        }
+        
         if (hideChoiceButton == false)
         {
             if (isAddingButton)
@@ -128,9 +133,9 @@ public class MainRes
     }
 
     public MarkupBuilder<InlineKeyboardMarkup> GetInlineUnderChoiceListForUser(BotUser user,
-        IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, int choiceListCount, bool isAddingButton = true)
+        IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, int choiceListCount, bool chatHasExisted, bool isAddingButton = true)
     {
-        var inline = GetInlineUnderLetterForUser(user, userClaims, letterUserTelegramId, isAddingButton);
+        var inline = GetInlineUnderLetterForUser(user, userClaims, letterUserTelegramId, chatHasExisted, isAddingButton);
 
         if (choiceListCount > 0)
         {

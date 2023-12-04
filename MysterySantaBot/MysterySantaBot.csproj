@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Burtimax.TelegramBot.Framework" Version="1.1.2" />
         <PackageReference Include="Mapster" Version="6.5.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.13" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
@@ -30,6 +29,12 @@
 
     <ItemGroup>
       <Folder Include="Database\Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="BotFramework">
+        <HintPath>..\..\..\..\BotTemplateWebApi\src\BotFramework\bin\Debug\net6.0\BotFramework.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

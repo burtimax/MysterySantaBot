@@ -1,33 +1,35 @@
 {
   "Default" : {
-    "BotIntroduction" : "Вступление бота",
-    "BotRules" : "Правила бота",
+    "BotIntroduction" : "**Правила**\n\uD83C\uDF85 Для участия тебе необходимо в боте написать письмо для тайного Санты.\n\uD83C\uDF85 Ты можешь добавить в избранное до 3 писем других участников, кому захочешь сделать подарок.\n\uD83C\uDF85 После 28 декабря ты сможешь связаться с избранными участниками и переслать или передать подарок.\n\uD83C\uDF85 Ты также можешь оценивать уровень креатива писем других участников, самые креативные получат подарки от организаторов.\n\uD83C\uDF85 Участие принимают только жители г.Ставрополя и ближайших окраин.\n\nЕсли ты готов, введи **Поехали** \uD83D\uDE1C",
+    "BotRules" : "\uD83C\uDF85 Для участия тебе необходимо в боте написать письмо для тайного Санты.\n\uD83C\uDF85 Ты можешь добавить в избранное до 3 писем других участников, кому захочешь сделать подарок.\n\uD83C\uDF85 После 28 декабря ты сможешь связаться с избранными участниками и переслать или передать подарок.\n\uD83C\uDF85 Ты также можешь оценивать уровень креатива писем других участников, самые креативные получат подарки от организаторов.\n\uD83C\uDF85 Участие принимают только жители г.Ставрополя и ближайших окраин.",
     "NotExpectedUpdate" : "Не понимаю тебя",
     "Cancel" : "Назад",
-    "Edit" : "Редактировать"
+    "Edit" : "Редактировать",
+    "SupportUser" : "@burtimax"
   },
   "Notification" : {
     "NewLetterForModeration" : "Новое письмо на модерацию",
     "YourLetterWasAddedToChoiceList" : "Твое письмо кем-то было добавлено в избранные"
   },
   "StartState": {
-    "Introduction" : "Привет, я бот тайный санта. Введи свое имя!"
+    "Introduction" : "Давай напишем письмо санте! \nДля начала введи свое имя!",
+    "Go" : "Поехали"
   },
   "SetNameState": {
-    "SetNameSuccess" : "Введено имя",
-    "InputName": "Введите имя",
+    "SetNameSuccess" : "✅",
+    "InputName": "Введи свое имя",
     "TooLongName": "Какое-то у тебя длинное имя, введи по-короче."
   },
   "SetAgeState": {
-    "InputAge": "Введите ваш возраст"
+    "InputAge": "Введи свой возраст (число)"
   },
   "SetPhotoState": {
-    "InputPhoto": "Отправь свое фото для открытки тайному санте",
+    "InputPhoto": "Отправь свое фото для открытки тайному санте. \nВажно отправить именно свое фото, чтобы санта не отправил пиьмо в спам \uD83D\uDE05",
     "SetCurrentPhoto": "Оставить текущее",
     "SetCurrentPhotoKeyboard": "[{{SetPhotoState.SetCurrentPhoto}}]"
   },
   "SetDescriptionState": {
-    "InputDescription": "Напиши письмо тайному санте",
+    "InputDescription": "Напиши письмо тайному санте. \nРасскажи о том, как хорошо себя вел в этом году, и что бы ты хотел в подарок? \n ❗\uFE0F Важное условие, чтобы желаемый подарок был не дороже 1000₽. \n ❗\uFE0F Максимальный объем письма до 800 символов.",
     "SetCurrentDescription": "Оставить текущее",
     "SetCurrentDescriptionKeyboard": "[{{SetDescriptionState.SetCurrentDescription}}]",
     "DescriptionExceedTheLimit": "Письмо не должно превышать {0} символов. Напиши немного короче."
@@ -37,7 +39,7 @@
     "Heart" : "❤\uFE0F",
     "Letter" : "✉\uFE0F",
     "Pine" : "\uD83C\uDF84",
-    "CheckLetterModeratorButton" : "Модерация",
+    "CheckLetterModeratorButton" : "✅",
     "Left" : "⬅",
     "Right" : "➡",
     "Like" : "\uD83D\uDC4D",
@@ -51,16 +53,16 @@
     "Unexpected": "Жми на кнопки",
     "ButtonAddToChoiceList": "В избранное {{MainState.Heart}}",
     "ButtonRemoveFromChoiceList": "Убрать из избранного",
-    "ExceedLimitInChoiceList": "Вы не можете добавить в избранное больше {0} писем.",
+    "ExceedLimitInChoiceList": "Нельзя добавить в избранное больше {0} писем.",
     "SuccessAddToChoiceList": "Письмо добавлено в избранное.",
-    "SuccessLetterAllowed": "Письмо одобрено модератором.",
-    "SuccessLetterForbid": "Письмо не прошло модерацию.",
-    "NoLettersForModeration": "Список писем для модерации пуст.",
-    "SuccessRemoveFromChoiceList": "Письмо удалено из списка избранное.",
-    "ChoiceListIsEmpty": "Список избранных пуст.",
-    "NotFoundLetters": "Нет больше писем, скоро придут.",
+    "SuccessLetterAllowed": "Письмо одобрено модератором \uD83D\uDC4D",
+    "SuccessLetterForbid": "Письмо не прошло модерацию \uD83D\uDC4E",
+    "NoLettersForModeration": "Список писем для модерации пуст",
+    "SuccessRemoveFromChoiceList": "Письмо удалено из списка избранных",
+    "ChoiceListIsEmpty": "Список избранных пуст. \n{{MainState.Introduction}}",
+    "NotFoundLetters": "Нет писем, скоро придут.",
     "EditLetterInlineButton": "Редактировать {{MainState.Letter}}",
-    "YourLetterWasForbiddenByModeratorNotification": "Ваше письмо не прошло модерацию и будет спрятано от тайного санты, отредактируй письмо и все будет чики-пуки)",
+    "YourLetterWasForbiddenByModeratorNotification": "Твое письмо не прошло модерацию и теперь его не видят другие, отредактируй письмо и все будет чики-пуки) \nИли свяжись с службой поддержки {{Default.SupportUser}}",
     "HideMessage": "{{Default.Cancel}}"
   }
 }

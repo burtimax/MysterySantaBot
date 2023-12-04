@@ -1,7 +1,10 @@
 ﻿using BotFramework.Attributes;
 using BotFramework.Base;
+using BotFramework.Other;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MysterySantaBot.Command;
 
@@ -14,6 +17,10 @@ public class StartCommand : BaseMysterySantaCommand
 
     public override async Task HandleBotRequest(Update update)
     {
-        await Answer(R.Default.BotIntroduction);
+        MarkupBuilder<ReplyKeyboardMarkup> markupBuilder = new();
+        markupBuilder.NewRow().Add(R.StartState.Go);
+        var markup = (ReplyKeyboardMarkup) markupBuilder.Build();
+        markup.OneTimeKeyboard = true;
+        await Answer(R.Default.BotIntroduction, parseMode:ParseMode.Markdown, markup);
     }
 }

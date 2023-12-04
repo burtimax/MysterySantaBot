@@ -8,6 +8,8 @@ using MysterySantaBot.Resources.Res;
 using MysterySantaBot.State.SetNameState;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MysterySantaBot.State.StartState;
 
@@ -23,7 +25,7 @@ public class StartState : BaseMysterySantaState
 
     public override async Task HandleBotRequest(Update update)
     {
-        await BotClient.SendTextMessageAsync(Chat.ChatId, r.Introduction);
+        await BotClient.SendTextMessageAsync(Chat.ChatId, r.Introduction, ParseMode.Markdown);
         await ChangeState(nameof(SetName));
     }
 }

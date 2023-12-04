@@ -32,8 +32,11 @@ public partial class Main
             await AddToChoiceList(chosenUserTelegramId);
 
             MarkupBuilder<InlineKeyboardMarkup> inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
-                ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, await GetChoiceListCount(), false)
-                : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, false);
+                ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, 
+                    await GetChoiceListCount(), 
+                    await HasChatExisted(BotClient, chosenUserTelegramId), 
+                    false)
+                : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, await HasChatExisted(BotClient, chosenUserTelegramId), false);
             
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId,
                 (InlineKeyboardMarkup)inlineForUpdate.Build());
@@ -60,8 +63,10 @@ public partial class Main
             await RemoveFromChoiceList(chosenUserTelegramId);
 
             MarkupBuilder<InlineKeyboardMarkup> inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
-                ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, await GetChoiceListCount(), true)
-                : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, true);
+                ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, await GetChoiceListCount(), 
+                    await HasChatExisted(BotClient, chosenUserTelegramId),
+                    true)
+                : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, await HasChatExisted(BotClient, chosenUserTelegramId), true);
             
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId,
                 (InlineKeyboardMarkup)inlineForUpdate.Build());
@@ -89,7 +94,8 @@ public partial class Main
             //await BotClient.DeleteMessageAsync(Chat.ChatId, callbackQuery.Message.MessageId);
             //await ShowLetterFromChoiceList(prevUserForm);
             var data = await GetDataForLetter(prevUserForm, false);
-            var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, prevUserForm.UserTelegramId, await GetChoiceListCount(), false);
+            var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, prevUserForm.UserTelegramId, await GetChoiceListCount(), 
+                await HasChatExisted(BotClient, prevUserForm.UserTelegramId),false);
             await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId,
                 new InputMediaPhoto(new InputMedia(data.photo.Content, data.photo.FileName)));
             await BotClient.EditMessageCaptionAsync(Chat.ChatId, callbackQuery.Message.MessageId, data.caption, ParseMode.Html);
@@ -119,7 +125,8 @@ public partial class Main
             // await BotClient.DeleteMessageAsync(Chat.ChatId, callbackQuery.Message.MessageId);
             // await ShowLetterFromChoiceList(nextUserForm);
             var data = await GetDataForLetter(nextUserForm, false);
-            var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, nextUserForm.UserTelegramId, await GetChoiceListCount(), false);
+            var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, nextUserForm.UserTelegramId, await GetChoiceListCount(),
+                await HasChatExisted(BotClient, nextUserForm.UserTelegramId),false);
             await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId,
                 new InputMediaPhoto(new InputMedia(data.photo.Content, data.photo.FileName)));
             await BotClient.EditMessageCaptionAsync(Chat.ChatId, callbackQuery.Message.MessageId, data.caption, ParseMode.Html);
