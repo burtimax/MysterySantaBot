@@ -2,9 +2,20 @@
 
 namespace MysterySantaBot.Database.Entities;
 
-public class ShowHistory : BaseBotEntity<long>
+public class LetterMark : BaseBotEntity<long>
 {
+    /// <summary>
+    /// Кто поставил оценку
+    /// </summary>
     public long UserTelegramId { get; set; }
-    public long ShownUserTelegramId { get; set; }
-    public DateTime LastShown { get; set; }
+    
+    /// <summary>
+    /// Кому поставили оценку
+    /// </summary>
+    public long LetterUserTelegramId { get; set; }
+    
+    /// <summary>
+    /// Оценка
+    /// </summary>
+    public LetterMarkType Mark { get; set; }
 }

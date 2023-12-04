@@ -1,7 +1,7 @@
 ﻿namespace MysterySantaBot.Resources.Res;
 
-public class DefaultRes
+public class NotificationRes
 {
-    public string NotExpectedUpdate { get; set; }
-    public string Cancel { get; set; }
+    public string NewLetterForModeration { get; set; }
+    public string YourLetterWasAddedToChoiceList { get; set; }
 }

@@ -1,19 +1,14 @@
-﻿using BotFramework;
-using BotFramework.Attributes;
-using BotFramework.Base;
-using BotFramework.Db.Entity;
-using BotFramework.Enums;
+﻿using BotFramework.Attributes;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MysterySantaBot.Database.Entities;
-using MysterySantaBot.Resources;
 using MysterySantaBot.Resources.Res;
+using MysterySantaBot.State.SetPhotoState;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace MysterySantaBot.State.StartState;
+namespace MysterySantaBot.State.SetAgeState;
 
 [BotState(nameof(SetAge))]
 public class SetAge : BaseMysterySantaState
@@ -37,6 +32,7 @@ public class SetAge : BaseMysterySantaState
 
     public override Task UnexpectedUpdateHandler()
     {
+        return base.UnexpectedUpdateHandler();
         return Answer(r.InputAge);
     }
 

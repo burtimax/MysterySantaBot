@@ -1,17 +1,14 @@
-﻿using BotFramework;
-using BotFramework.Attributes;
-using BotFramework.Base;
-using BotFramework.Enums;
+﻿using BotFramework.Attributes;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MysterySantaBot.Database.Entities;
-using MysterySantaBot.Resources;
 using MysterySantaBot.Resources.Res;
+using MysterySantaBot.State.SetAgeState;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
-namespace MysterySantaBot.State.StartState;
+namespace MysterySantaBot.State.SetNameState;
 
 [BotState(nameof(SetName))]
 public class SetName : BaseMysterySantaState
@@ -24,6 +21,12 @@ public class SetName : BaseMysterySantaState
        ExpectedMessage(MessageType.Text);
     }
 
+    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, ChatId chatId, SetNameRes r)
+    {
+        IReplyMarkup keyboard = userForm.Age != null ? r.PreviousName(userForm.Name) : default;
+        await botClient.SendTextMessageAsync(chatId, r.InputName, replyMarkup: keyboard);
+    }
+    
     public override Task UnexpectedUpdateHandler()
     {
         return Answer(r.InputName);
@@ -31,19 +34,21 @@ public class SetName : BaseMysterySantaState
 
     public override async Task HandleMessage(Message message)
     {
-        if (string.IsNullOrEmpty(message.Text))
+        string name = message.Text;
+
+        if (name.Length > 50)
         {
-            
+            await Answer(r.TooLongName);
             return;
         }
-        
+
         UserForm? existed = await Db.UsersForm.SingleOrDefaultAsync(uf => uf.UserTelegramId == User.TelegramId);
         if (existed == null)
         {
             existed = new UserForm()
             {
                 UserTelegramId = User.TelegramId,
-                Name = message.Text!
+                Name = name!
             };
             
             Db.UsersForm.Add(existed);
@@ -51,7 +56,7 @@ public class SetName : BaseMysterySantaState
         }
         else
         {
-            existed.Name = message.Text!;
+            existed.Name = name!;
             await Db.SaveChangesAsync();
         }
         

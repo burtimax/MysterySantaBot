@@ -2,5 +2,6 @@
 
 public enum LetterMarkType
 {
-    
+    Dislike = -1,
+    Like = 1,
 }

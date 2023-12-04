@@ -1,36 +1,37 @@
-﻿using BotFramework;
-using BotFramework.Attributes;
-using BotFramework.Base;
+﻿using BotFramework.Attributes;
 using BotFramework.Enums;
 using BotFramework.Extensions;
 using BotFramework.Models;
 using BotFramework.Other;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using MysterySantaBot.Database.Entities;
-using MysterySantaBot.Resources;
 using MysterySantaBot.Resources.Res;
+using MysterySantaBot.Services;
+using MysterySantaBot.State.SetAgeState;
+using MysterySantaBot.State.SetDescriptionState;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace MysterySantaBot.State.StartState;
+namespace MysterySantaBot.State.SetPhotoState;
 
 [BotState(nameof(SetPhoto))]
 public class SetPhoto : BaseMysterySantaState
 {
     private SetPhotoRes r => R.SetPhotoState;
+    private FileMediaService _mediaService;
     
     public SetPhoto(IServiceProvider serviceProvider) : base(serviceProvider)
     {
+        _mediaService = serviceProvider.GetRequiredService<FileMediaService>();
        Expected(UpdateType.Message);
-       ExpectedMessage(MessageType.Photo);
+       ExpectedMessage(MessageType.Photo, MessageType.Text);
     }
     
     public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, ChatId chatId, SetPhotoRes r)
     {
-        IReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Photo) == false ? r.SetCurrentPhoto.ToReplyMarkup<ReplyKeyboardMarkup>() : default;
+        IReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Photo) == false ? r.SetCurrentPhotoKeyboard.ToReplyMarkup<ReplyKeyboardMarkup>() : default;
         await botClient.SendTextMessageAsync(chatId, r.InputPhoto, replyMarkup: keyboard);
     }
 
@@ -42,17 +43,32 @@ public class SetPhoto : BaseMysterySantaState
     public override async Task HandleMessage(Message message)
     {
         UserForm existed = await Db.UsersForm.SingleAsync(uf => uf.UserTelegramId == User.TelegramId);
+        
+        // Оставить текущее фото
+        if (message.Type == MessageType.Text )
+        {
+            if (string.Equals(message.Text, r.SetCurrentPhoto))
+            {
+                await GoNext(existed);
+                return;
+            }
+
+            await UnexpectedUpdateHandler();
+            return;
+        }
 
         // Сохраняем фото в локальной папке.
-        string fileName = message.Photo.GetFileByQuality(PhotoQuality.High).FileUniqueId + ".jpeg";
-        FilePath fp = new FilePath(Path.Combine(MediaDirectory, fileName));
-        await BotMediaHelper.DownloadAndSaveTelegramFileAsync(BotClient, 
-            message.Photo.GetFileByQuality(PhotoQuality.High).FileId, fp);
+        FilePath fp = await _mediaService.LoadPhoto(message.Photo);
         
-        existed.Photo = fileName;
+        existed.Photo = fp.FileName;
         await Db.SaveChangesAsync();
 
-        await ChangeState(nameof(SetAge));
-        await SetAge.Introduce(BotClient, existed, Chat.ChatId, R.SetAgeState);
+        await GoNext(existed);
+    }
+
+    private async Task GoNext(UserForm uf)
+    {
+        await ChangeState(nameof(SetDescription));
+        await SetDescription.Introduce(BotClient, uf, Chat.ChatId, R.SetDescriptionState);
     }
 }

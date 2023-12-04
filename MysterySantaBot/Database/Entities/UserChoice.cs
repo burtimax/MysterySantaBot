@@ -1,6 +1,9 @@
-﻿namespace MysterySantaBot.Database.Entities;
+﻿using BotFramework.Db.Entity;
 
-public class UserChoice
+namespace MysterySantaBot.Database.Entities;
+
+public class UserChoice : BaseBotEntity<long>
 {
-    
+    public long UserTelegramId { get; set; }
+    public long ChosenUserTelegramId { get; set; }
 }

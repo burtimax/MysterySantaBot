@@ -1,6 +1,10 @@
-﻿namespace MysterySantaBot.Resources.Res;
+﻿using Telegram.Bot.Types.ReplyMarkups;
+
+namespace MysterySantaBot.Resources.Res;
 
 public class SetPhotoRes
 {
-    
+    public string InputPhoto { get; set; }
+    public string SetCurrentPhoto { get; set; }
+    public string SetCurrentPhotoKeyboard { get; set; }
 }
