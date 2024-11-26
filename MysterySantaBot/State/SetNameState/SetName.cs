@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MultipleBotFramework.Attributes;
+using MultipleBotFramework.Dispatcher.HandlerResolvers;
 using MultipleBotFramework.Enums;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
@@ -10,9 +11,10 @@ using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetNameState;
 
-[BotState(nameof(SetName))]
+[BotHandler(stateName:Name)]
 public class SetName : BaseMysterySantaState
 {
+    public const string Name = "SetNameState";
     private SetNameRes r => R.SetNameState;
     
     public SetName(IServiceProvider serviceProvider) : base(serviceProvider)

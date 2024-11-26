@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MultipleBotFramework;
 using MultipleBotFramework.Attributes;
+using MultipleBotFramework.Dispatcher.HandlerResolvers;
 using MultipleBotFramework.Enums;
 using MultipleBotFramework.Utils;
 using MultipleBotFramework.Utils.Keyboard;
@@ -12,9 +13,10 @@ using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetDescriptionState;
 
-[BotState(nameof(SetDescription))]
+[BotHandler(stateName:Name)]
 public class SetDescription : BaseMysterySantaState
 {
+    public const string Name = "SetDescriptionState";
     private const int MaxDescriptionLength = 800;
     
     private SetDescriptionRes r => R.SetDescriptionState;

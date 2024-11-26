@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MultipleBotFramework.Attributes;
+using MultipleBotFramework.Dispatcher.HandlerResolvers;
 using MultipleBotFramework.Enums;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
@@ -10,9 +11,10 @@ using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetAgeState;
 
-[BotState(nameof(SetAge))]
+[BotHandler(stateName: Name)]
 public class SetAge : BaseMysterySantaState
 {
+    public const string Name = "SetAgeState";
     private const int MinAge = 0;
     private const int MaxAge = 100;
     
