@@ -1,16 +1,16 @@
-﻿using BotFramework.Base;
-using BotFramework.Enums;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using MultipleBotFramework.Base;
+using MultipleBotFramework.Constants;
+using MultipleBotFramework.Enums;
 using MysterySantaBot.Database;
 using MysterySantaBot.Resources;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
+using Telegram.BotAPI.GettingUpdates;
 
 namespace MysterySantaBot.Command;
 
-public class BaseMysterySantaCommand : BaseBotCommand
+public class BaseMysterySantaCommand : BaseBotHandler
 {
     protected IServiceProvider ServiceProvider;
     protected readonly BotResources R;
@@ -24,9 +24,9 @@ public class BaseMysterySantaCommand : BaseBotCommand
     }
     
 
-    protected Task Answer(string text, ParseMode parseMode = ParseMode.Html, IReplyMarkup replyMarkup = default)
+    protected async Task<Message> Answer(string text, string parseMode = ParseMode.Html, ReplyMarkup replyMarkup = default)
     {
-        return BotClient.SendTextMessageAsync(Chat.ChatId, text, parseMode, replyMarkup: replyMarkup);
+        return await BotClient.SendMessageAsync(Chat.ChatId, text, parseMode:parseMode, replyMarkup: replyMarkup);
     }
     
     public async Task ChangeState(string stateName, ChatStateSetterType setterType = ChatStateSetterType.ChangeCurrent)

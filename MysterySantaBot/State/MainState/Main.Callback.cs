@@ -1,14 +1,13 @@
-﻿using BotFramework;
-using BotFramework.Extensions;
-using BotFramework.Other;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MultipleBotFramework;
+using MultipleBotFramework.Constants;
+using MultipleBotFramework.Utils;
+using MultipleBotFramework.Utils.Keyboard;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
+using Telegram.BotAPI.UpdatingMessages;
 
 namespace MysterySantaBot.State.SetDescriptionState;
 
@@ -31,7 +30,7 @@ public partial class Main
 
             await AddToChoiceList(chosenUserTelegramId);
 
-            MarkupBuilder<InlineKeyboardMarkup> inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
+            InlineKeyboardBuilder inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
                 ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, 
                     await GetChoiceListCount(), 
                     await HasChatExisted(BotClient, chosenUserTelegramId), 
@@ -39,7 +38,7 @@ public partial class Main
                 : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, await HasChatExisted(BotClient, chosenUserTelegramId), false);
             
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId,
-                (InlineKeyboardMarkup)inlineForUpdate.Build());
+                replyMarkup: inlineForUpdate.Build());
             
             UserForm existed = await Db.UsersForm.SingleAsync(uf => uf.UserTelegramId == User.TelegramId);
             await SearchAndShowNextLetter(existed);
@@ -62,14 +61,14 @@ public partial class Main
 
             await RemoveFromChoiceList(chosenUserTelegramId);
 
-            MarkupBuilder<InlineKeyboardMarkup> inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
+           InlineKeyboardBuilder inlineForUpdate = User.AdditionalProperties.Contains(MainRes.PropKeyChoiceListWasLastButton) 
                 ? r.GetInlineUnderChoiceListForUser(User, UserClaims, chosenUserTelegramId, await GetChoiceListCount(), 
                     await HasChatExisted(BotClient, chosenUserTelegramId),
                     true)
                 : r.GetInlineUnderLetterForUser(User, UserClaims, chosenUserTelegramId, await HasChatExisted(BotClient, chosenUserTelegramId), true);
             
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId,
-                (InlineKeyboardMarkup)inlineForUpdate.Build());
+                replyMarkup: inlineForUpdate.Build());
             await BotClient.AnswerCallbackQueryAsync(callbackQuery.Id);
             return;
         }
@@ -96,11 +95,10 @@ public partial class Main
             var data = await GetDataForLetter(prevUserForm, false);
             var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, prevUserForm.UserTelegramId, await GetChoiceListCount(), 
                 await HasChatExisted(BotClient, prevUserForm.UserTelegramId),false);
-            await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId,
-                new InputMediaPhoto(new InputMedia(data.photo.Content, data.photo.FileName)));
+            await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId, new InputMediaPhoto(prevUserForm.Photo!) );
             await BotClient.EditMessageCaptionAsync(Chat.ChatId, callbackQuery.Message.MessageId, data.caption, ParseMode.Html);
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId,
-                (InlineKeyboardMarkup)inline.Build());
+                replyMarkup: inline.Build());
             await BotClient.AnswerCallbackQueryAsync(callbackQuery.Id);
             return;
         }
@@ -127,11 +125,10 @@ public partial class Main
             var data = await GetDataForLetter(nextUserForm, false);
             var inline = r.GetInlineUnderChoiceListForUser(User, UserClaims, nextUserForm.UserTelegramId, await GetChoiceListCount(),
                 await HasChatExisted(BotClient, nextUserForm.UserTelegramId),false);
-            await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId,
-                new InputMediaPhoto(new InputMedia(data.photo.Content, data.photo.FileName)));
+            await BotClient.EditMessageMediaAsync(Chat.ChatId, callbackQuery.Message.MessageId, new InputMediaPhoto(nextUserForm.Photo));
             await BotClient.EditMessageCaptionAsync(Chat.ChatId, callbackQuery.Message.MessageId, data.caption, ParseMode.Html);
             await BotClient.EditMessageReplyMarkupAsync(Chat.ChatId, callbackQuery.Message.MessageId, 
-                (InlineKeyboardMarkup)inline.Build());
+                replyMarkup: inline.Build());
             await BotClient.AnswerCallbackQueryAsync(callbackQuery.Id);
             return;
         }
@@ -221,9 +218,9 @@ public partial class Main
 
             await BotClient.AnswerCallbackQueryAsync(callbackQuery.Id);
             // Уведомление для пользователя.
-            await BotHelper.ExecuteFor(BotDbContext, letterUserTelegramId, async tuple =>
+            await BotHelper.ExecuteFor(BotDbContext, AppConstants.BotId, letterUserTelegramId, async tuple =>
             {
-                await BotClient.SendTextMessageAsync(tuple.chat.ChatId, r.YourLetterWasForbiddenByModeratorNotification);
+                await BotClient.SendMessageAsync(tuple.chat.ChatId, r.YourLetterWasForbiddenByModeratorNotification);
             });
             await Answer(r.SuccessLetterForbid);
             return;
@@ -236,9 +233,9 @@ public partial class Main
     /// <param name="letterUserTelegramId"></param>
     private async Task NotifyUserAddedToChoiceList(long letterUserTelegramId)
     {
-        await BotHelper.ExecuteFor(BotDbContext, letterUserTelegramId, async tuple =>
+        await BotHelper.ExecuteFor(BotDbContext, AppConstants.BotId, letterUserTelegramId, async tuple =>
         {
-            await BotClient.SendTextMessageAsync(tuple.chat.ChatId, R.Notification.YourLetterWasAddedToChoiceList);
+            await BotClient.SendMessageAsync(tuple.chat.ChatId, R.Notification.YourLetterWasAddedToChoiceList);
         });
     }
     

@@ -11,4 +11,6 @@ public class AppConstants
     /// Максимальное кол-во писем в выбранных.
     /// </summary>
     public const int MaxChosen = 3;
+    
+    public const int BotId = 1;
 }

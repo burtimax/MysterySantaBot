@@ -1,9 +1,8 @@
-﻿using BotFramework.Db;
-using BotFramework.Db.Entity;
-using BotFramework.Options;
-using Microsoft.CodeAnalysis.Options;
+﻿using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MultipleBotFramework.Db;
+using MultipleBotFramework.Options;
 using MysterySantaBot.Database.Entities;
 
 namespace MysterySantaBot.Database;
@@ -48,7 +47,7 @@ public class SantaBotDbContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken ct = default)
     {
         foreach (var e in
-                 ChangeTracker.Entries<BaseBotEntity<long>>())
+                 ChangeTracker.Entries<IBaseEntity>())
         {
             switch (e.State)
             {

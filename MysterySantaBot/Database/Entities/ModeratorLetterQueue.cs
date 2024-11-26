@@ -1,8 +1,7 @@
-﻿using BotFramework.Db.Entity;
-
+﻿
 namespace MysterySantaBot.Database.Entities;
 
-public class ModeratorLetterQueue : BaseBotEntity<long>
+public class ModeratorLetterQueue : BaseEntity<long>
 {
     /// <summary>
     /// Отправитель письма.

@@ -1,12 +1,12 @@
-﻿using BotFramework.Attributes;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MultipleBotFramework.Attributes;
+using MultipleBotFramework.Enums;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
 using MysterySantaBot.State.SetPhotoState;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetAgeState;
 
@@ -24,10 +24,10 @@ public class SetAge : BaseMysterySantaState
        ExpectedMessage(MessageType.Text);
     }
 
-    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, ChatId chatId, SetAgeRes r)
+    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, long chatId, SetAgeRes r)
     {
-        IReplyMarkup keyboard = userForm.Age != null ? r.PreviousAge((int) userForm.Age) : default;
-        await botClient.SendTextMessageAsync(chatId, r.InputAge, replyMarkup: keyboard);
+        ReplyMarkup keyboard = userForm.Age != null ? r.PreviousAge((int) userForm.Age) : default;
+        await botClient.SendMessageAsync(chatId, r.InputAge, replyMarkup: keyboard);
     }
 
     public override Task UnexpectedUpdateHandler()

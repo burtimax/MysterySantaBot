@@ -1,8 +1,6 @@
-﻿using BotFramework.Db.Entity;
+﻿namespace MysterySantaBot.Database.Entities;
 
-namespace MysterySantaBot.Database.Entities;
-
-public class LetterMark : BaseBotEntity<long>
+public class LetterMark : BaseEntity<long>
 {
     /// <summary>
     /// Кто поставил оценку

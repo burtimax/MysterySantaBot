@@ -1,8 +1,7 @@
-﻿using BotFramework.Db.Entity;
-
+﻿
 namespace MysterySantaBot.Database.Entities;
 
-public class UserForm : BaseBotEntity<long>
+public class UserForm : BaseEntity<long>
 {
     public long UserTelegramId { get; set; }
     public string? Name { get; set; }

@@ -1,5 +1,5 @@
-﻿using BotFramework.Other;
-using Telegram.Bot.Types.ReplyMarkups;
+﻿using MultipleBotFramework.Utils.Keyboard;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.Resources.Res;
 
@@ -7,5 +7,5 @@ public class SetAgeRes
 {
     public string InputAge { get; set; }
 
-    public IReplyMarkup PreviousAge(int age) => new MarkupBuilder<ReplyKeyboardMarkup>().NewRow().Add(age.ToString()).Build();
+    public ReplyMarkup PreviousAge(int age) => new ReplyKeyboardBuilder().NewRow().Add(age.ToString()).Build();
 }

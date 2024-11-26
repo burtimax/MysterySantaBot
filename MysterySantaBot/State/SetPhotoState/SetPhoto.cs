@@ -1,38 +1,41 @@
-﻿using BotFramework.Attributes;
-using BotFramework.Enums;
-using BotFramework.Extensions;
-using BotFramework.Models;
-using BotFramework.Other;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MultipleBotFramework.Dispatcher.HandlerResolvers;
+using MultipleBotFramework.Enums;
+using MultipleBotFramework.Extensions;
+using MultipleBotFramework.Models;
+using MultipleBotFramework.Utils.Keyboard;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
 using MysterySantaBot.Services;
 using MysterySantaBot.State.SetAgeState;
 using MysterySantaBot.State.SetDescriptionState;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetPhotoState;
 
-[BotState(nameof(SetPhoto))]
+[BotHandler(stateName: Name, version: 2.0f)]
 public class SetPhoto : BaseMysterySantaState
 {
+    public const string Name = "SetPhotoState";
+    
     private SetPhotoRes r => R.SetPhotoState;
-    private FileMediaService _mediaService;
+    //private FileMediaService _mediaService;
     
     public SetPhoto(IServiceProvider serviceProvider) : base(serviceProvider)
     {
-        _mediaService = serviceProvider.GetRequiredService<FileMediaService>();
+       // _mediaService = serviceProvider.GetRequiredService<FileMediaService>();
        Expected(UpdateType.Message);
        ExpectedMessage(MessageType.Photo, MessageType.Text);
     }
     
-    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, ChatId chatId, SetPhotoRes r)
+    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, long chatId, SetPhotoRes r)
     {
-        IReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Photo) == false ? r.SetCurrentPhotoKeyboard.ToReplyMarkup<ReplyKeyboardMarkup>() : default;
-        await botClient.SendTextMessageAsync(chatId, r.InputPhoto, replyMarkup: keyboard);
+        ReplyKeyboardBuilder keyboardBuilder = new();
+        keyboardBuilder.NewRow().Add("Оставить текущее");
+        ReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Photo) == false ?keyboardBuilder : default;
+        await botClient.SendMessageAsync(chatId, r.InputPhoto, replyMarkup: keyboard);
     }
 
     public override Task UnexpectedUpdateHandler()
@@ -45,7 +48,7 @@ public class SetPhoto : BaseMysterySantaState
         UserForm existed = await Db.UsersForm.SingleAsync(uf => uf.UserTelegramId == User.TelegramId);
         
         // Оставить текущее фото
-        if (message.Type == MessageType.Text )
+        if (message.Type() == MessageType.Text )
         {
             if (string.Equals(message.Text, r.SetCurrentPhoto))
             {
@@ -58,9 +61,10 @@ public class SetPhoto : BaseMysterySantaState
         }
 
         // Сохраняем фото в локальной папке.
-        FilePath fp = await _mediaService.LoadPhoto(message.Photo);
+        // FilePath fp = await _mediaService.LoadPhoto(message.Photo);
+        string photoFileId = message.Photo.Last().FileId;
         
-        existed.Photo = fp.FileName;
+        existed.Photo = photoFileId;
         await Db.SaveChangesAsync();
 
         await GoNext(existed);

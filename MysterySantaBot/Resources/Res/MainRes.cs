@@ -1,10 +1,9 @@
-﻿using BotFramework;
-using BotFramework.Db.Entity;
-using BotFramework.Dto;
-using BotFramework.Extensions;
-using BotFramework.Other;
+﻿using MultipleBotFramework;
+using MultipleBotFramework.Db.Entity;
+using MultipleBotFramework.Dto;
+using MultipleBotFramework.Utils.Keyboard;
 using MysterySantaBot.Database.Entities;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.Resources.Res;
 
@@ -59,9 +58,9 @@ public class MainRes
     /// </summary>
     /// <param name="userClaims"></param>
     /// <returns></returns>
-    public MarkupBuilder<ReplyKeyboardMarkup> GetMainKeyboard(IEnumerable<ClaimValue> userClaims)
+    public ReplyKeyboardBuilder GetMainKeyboard(IEnumerable<ClaimValue> userClaims)
     {
-        MarkupBuilder<ReplyKeyboardMarkup> markupBuilder = new();
+        ReplyKeyboardBuilder markupBuilder = new();
         markupBuilder.NewRow()
             .Add(Santa)
             .Add(Heart)
@@ -81,9 +80,9 @@ public class MainRes
     /// </summary>
     /// <param name="me"></param>
     /// <returns></returns>
-    public MarkupBuilder<InlineKeyboardMarkup> GetMyLetterInline(UserForm me)
+    public InlineKeyboardBuilder GetMyLetterInline(UserForm me)
     {
-        MarkupBuilder<InlineKeyboardMarkup> inline = new();
+        InlineKeyboardBuilder inline = new();
         inline.NewRow()
             .Add(EditLetterInlineButton, InlineEditMyLetter)
             .NewRow()
@@ -97,11 +96,11 @@ public class MainRes
     /// <param name="user">Пользователь.</param>
     /// <param name="letterUserForm">Письмо.</param>
     /// <returns></returns>
-    public MarkupBuilder<InlineKeyboardMarkup> GetInlineUnderLetterForUser(BotUser user,
+    public InlineKeyboardBuilder GetInlineUnderLetterForUser(BotUserEntity user,
         IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, bool chatHasExisted, bool isAddingButton = true,
         bool hideChoiceButton = false)
     {
-        MarkupBuilder<InlineKeyboardMarkup> inline = new();
+        InlineKeyboardBuilder inline = new();
         
         if (userClaims.Any(uc => uc.Name == BotConstants.BaseBotClaims.BotUserGet))
         {
@@ -112,8 +111,10 @@ public class MainRes
             if (chatHasExisted)
             {
                 inline.NewRow()
-                    .Add(ButtonLinkToPrivateMessage,
-                        url: string.Format(AppConstants.UserPrivateMessageLinkFormat, letterUserTelegramId.ToString()));
+                    .Add(new InlineKeyboardButton(ButtonLinkToPrivateMessage)
+                    {
+                        Url = string.Format(AppConstants.UserPrivateMessageLinkFormat, letterUserTelegramId.ToString())
+                    });
             }
         }
         
@@ -132,7 +133,7 @@ public class MainRes
         return inline;
     }
 
-    public MarkupBuilder<InlineKeyboardMarkup> GetInlineUnderChoiceListForUser(BotUser user,
+    public InlineKeyboardBuilder GetInlineUnderChoiceListForUser(BotUserEntity user,
         IEnumerable<ClaimValue> userClaims, long letterUserTelegramId, int choiceListCount, bool chatHasExisted, bool isAddingButton = true)
     {
         var inline = GetInlineUnderLetterForUser(user, userClaims, letterUserTelegramId, chatHasExisted, isAddingButton);

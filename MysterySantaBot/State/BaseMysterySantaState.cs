@@ -1,19 +1,20 @@
 ﻿using System.Net.Http.Headers;
-using BotFramework.Base;
-using BotFramework.Enums;
 using Microsoft.Extensions.Options;
+using MultipleBotFramework.Base;
+using MultipleBotFramework.Constants;
+using MultipleBotFramework.Enums;
+using MultipleBotFramework.Extensions;
 using MysterySantaBot.Database;
 using MysterySantaBot.Resources;
-using Telegram.Bot;
-using Telegram.Bot.Requests;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
+using Telegram.BotAPI.GettingUpdates;
 
 namespace MysterySantaBot.State;
 
-public class BaseMysterySantaState : BaseBotState
+public class BaseMysterySantaState : BaseBotHandler
 {
+    protected string NotExpectedMessage { get; set; } 
     protected IServiceProvider ServiceProvider;
     protected readonly BotResources R;
     protected readonly SantaBotDbContext Db;
@@ -28,7 +29,7 @@ public class BaseMysterySantaState : BaseBotState
         Db = serviceProvider.GetRequiredService<SantaBotDbContext>();
     }
 
-    public override async Task HandleBotRequest(Update update)
+   public override async Task HandleBotRequest(Update update)
     {
         if (IsExpectedUpdate(update) == false)
         {
@@ -36,19 +37,19 @@ public class BaseMysterySantaState : BaseBotState
             return;
         }
         
-        if (update.Type == UpdateType.Message &&
+        if (update.Type() == MultipleBotFramework.Enums.UpdateType.Message &&
             IsExpectedMessageType(update.Message) == false)
         {
             await UnexpectedUpdateHandler();
             return;
         }
 
-        switch (update.Type)
+        switch (update.Type())
         {
-            case UpdateType.Message:
+            case MultipleBotFramework.Enums.UpdateType.Message:
                 await HandleMessage(update.Message!);
                 break;
-            case UpdateType.CallbackQuery:
+            case MultipleBotFramework.Enums.UpdateType.CallbackQuery:
                 await HandleCallbackQuery(update.CallbackQuery!);
                 break;
         }
@@ -56,7 +57,13 @@ public class BaseMysterySantaState : BaseBotState
 
     public virtual async Task UnexpectedUpdateHandler()
     {
-        await BotClient.SendTextMessageAsync(Chat.ChatId, R.Default.NotExpectedUpdate);
+        try
+        {
+            await Answer(NotExpectedMessage);
+        }
+        catch (Exception e)
+        {
+        }
     }
     
     public virtual async Task HandleMessage(Message message)
@@ -74,7 +81,7 @@ public class BaseMysterySantaState : BaseBotState
     /// Заполняем ожидаемые типы запросов для состояния.
     /// </summary>
     /// <param name="types"></param>
-    protected void Expected(params UpdateType[] types)
+    protected void Expected(params MultipleBotFramework.Enums.UpdateType[] types)
     {
         foreach (var type in types)
         {
@@ -96,17 +103,25 @@ public class BaseMysterySantaState : BaseBotState
 
     private bool IsExpectedUpdate(Update update)
     {
-        return ExpectedUpdates.Any() == false || ExpectedUpdates.Contains(update.Type);
+        return ExpectedUpdates.Any() == false || ExpectedUpdates.Contains(update.Type());
     }
     
     private bool IsExpectedMessageType(Message message)
     {
-        return ExpectedMessageTypes.Any() == false || ExpectedMessageTypes.Contains(message.Type);
+        return ExpectedMessageTypes.Any() == false || ExpectedMessageTypes.Contains(message.Type());
     }
 
-    protected Task Answer(string text, ParseMode parseMode = ParseMode.Html, IReplyMarkup replyMarkup = default)
+    protected Task<Message> Answer(string text, string parseMode = ParseMode.Html, ReplyMarkup replyMarkup = default)
     {
-        return BotClient.SendTextMessageAsync(Chat.ChatId, text, parseMode, replyMarkup: replyMarkup);
+        return BotClient.SendMessageAsync(Chat.ChatId, text:text, parseMode:parseMode, replyMarkup: replyMarkup);
+    }
+    
+    protected async Task AnswerCallback()
+    {
+        if (this.Update.Type() == MultipleBotFramework.Enums.UpdateType.CallbackQuery)
+        {
+            await BotClient.AnswerCallbackQueryAsync(this.Update.CallbackQuery.Id);
+        }
     }
     
     public async Task ChangeState(string stateName, ChatStateSetterType setterType = ChatStateSetterType.ChangeCurrent)
@@ -114,4 +129,5 @@ public class BaseMysterySantaState : BaseBotState
         Chat.States.Set(stateName, setterType);
         await BotDbContext.SaveChangesAsync();
     }
+    
 }

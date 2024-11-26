@@ -1,8 +1,7 @@
-﻿using BotFramework.Db.Entity;
-
+﻿
 namespace MysterySantaBot.Database.Entities;
 
-public class ShowHistory : BaseBotEntity<long>
+public class ShowHistory : BaseEntity<long>
 {
     public long UserTelegramId { get; set; }
     public long ShownUserTelegramId { get; set; }

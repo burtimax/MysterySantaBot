@@ -1,17 +1,14 @@
-﻿using BotFramework;
-using BotFramework.Attributes;
-using BotFramework.Enums;
-using BotFramework.Extensions;
-using BotFramework.Models;
-using BotFramework.Other;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using MultipleBotFramework;
+using MultipleBotFramework.Attributes;
+using MultipleBotFramework.Enums;
+using MultipleBotFramework.Utils;
+using MultipleBotFramework.Utils.Keyboard;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Resources.Res;
-using MysterySantaBot.State.SetAgeState;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetDescriptionState;
 
@@ -28,10 +25,12 @@ public class SetDescription : BaseMysterySantaState
        ExpectedMessage(MessageType.Text);
     }
     
-    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, ChatId chatId, SetDescriptionRes r)
+    public static async Task Introduce(ITelegramBotClient botClient, UserForm userForm, long chatId, SetDescriptionRes r)
     {
-        IReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Description) == false ? r.SetCurrentDescriptionKeyboard.ToReplyMarkup<ReplyKeyboardMarkup>() : default;
-        await botClient.SendTextMessageAsync(chatId, r.InputDescription, replyMarkup: keyboard);
+        ReplyKeyboardBuilder keyboardBuilder = new();
+        keyboardBuilder.NewRow().Add("Оставить текущее");
+        ReplyMarkup? keyboard = string.IsNullOrEmpty(userForm.Description) == false ? keyboardBuilder : default;
+        await botClient.SendMessageAsync(chatId, r.InputDescription, replyMarkup: keyboard);
     }
 
     public override Task UnexpectedUpdateHandler()
@@ -84,10 +83,10 @@ public class SetDescription : BaseMysterySantaState
         };
         Db.ModeratorLetterQueue.Add(newItem);
         await Db.SaveChangesAsync();
-        await BotHelper.ExecuteFor(BotDbContext, BotConstants.BaseBotClaims.BotUserGet, async tuple =>
+        await BotHelper.ExecuteFor(BotDbContext, AppConstants.BotId, BotConstants.BaseBotClaims.BotUserGet, async tuple =>
         {
-            await BotClient.SendTextMessageAsync(tuple.chat.ChatId, R.Notification.NewLetterForModeration);
-        });
+            await BotClient.SendMessageAsync(tuple.chat.ChatId, R.Notification.NewLetterForModeration);
+        }).ConfigureAwait(false);
     }
 
     private async Task GoNext(UserForm uf)

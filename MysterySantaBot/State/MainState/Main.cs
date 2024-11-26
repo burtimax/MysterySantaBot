@@ -1,39 +1,38 @@
 ﻿using System.Text;
-using BotFramework;
-using BotFramework.Attributes;
-using BotFramework.Enums;
-using BotFramework.Extensions;
-using BotFramework.Models;
-using BotFramework.Other;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MultipleBotFramework;
+using MultipleBotFramework.Constants;
+using MultipleBotFramework.Dispatcher.HandlerResolvers;
+using MultipleBotFramework.Enums;
+using MultipleBotFramework.Utils.Keyboard;
 using MysterySantaBot.Database.Entities;
 using MysterySantaBot.Options;
 using MysterySantaBot.Resources.Res;
 using MysterySantaBot.Services;
 using MysterySantaBot.State.SetAgeState;
 using MysterySantaBot.State.SetNameState;
-using Telegram.Bot;
-using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InputFiles;
-using Telegram.Bot.Types.ReplyMarkups;
+using Telegram.BotAPI;
+using Telegram.BotAPI.AvailableMethods;
+using Telegram.BotAPI.AvailableTypes;
 
 namespace MysterySantaBot.State.SetDescriptionState;
 
-[BotState(nameof(Main))]
+[BotHandler(stateName: Name, version: 2.0f)]
 public partial class Main : BaseMysterySantaState
 {
+    public const string Name = "MainState";
+    
     private readonly SearchLetterService _search;
-    private readonly FileMediaService _mediaService;
+    //private readonly FileMediaService _mediaService;
     private readonly AppOptions _appOptions;
     private MainRes r => R.MainState;
     
     public Main(IServiceProvider serviceProvider) : base(serviceProvider)
     {
        _search = serviceProvider.GetRequiredService<SearchLetterService>();
-       _mediaService = serviceProvider.GetRequiredService<FileMediaService>();
+       //_mediaService = serviceProvider.GetRequiredService<FileMediaService>();
        _appOptions = serviceProvider.GetRequiredService<IOptions<AppOptions>>().Value;
        Expected(UpdateType.Message, UpdateType.CallbackQuery);
        ExpectedMessage(MessageType.Text);
@@ -123,8 +122,8 @@ public partial class Main : BaseMysterySantaState
             await HasChatExisted(BotClient, userForm.UserTelegramId),
             isAddingButton);
         
-        await BotClient.SendPhotoAsync(Chat.ChatId, data.photo, data.caption,
-            ParseMode.Html, 
+        await BotClient.SendPhotoAsync(Chat.ChatId, photo: data.photoFileId, caption: data.caption,
+            parseMode: ParseMode.Html, 
             replyMarkup: inline.Build());
     }
 
@@ -149,22 +148,20 @@ public partial class Main : BaseMysterySantaState
             .NewRow()
             .Add(r.Like, MainRes.InlineLikeLetter + userForm.UserTelegramId)
             .Add(r.Dislike, MainRes.InlineDislikeLetter + userForm.UserTelegramId);
-
         
-        
-        await BotClient.SendPhotoAsync(Chat.ChatId, data.photo, data.caption,
-            ParseMode.Html, 
+        await BotClient.SendPhotoAsync(Chat.ChatId, data.photoFileId, caption:data.caption,
+            parseMode: ParseMode.Html, 
             replyMarkup: removeInline == false ? data.inline.Build() : default);
         await UpdateLastShownTime(userForm.UserTelegramId);
     }
 
-    private async Task<(InputOnlineFile photo, string caption, MarkupBuilder<InlineKeyboardMarkup> inline)>
+    private async Task<(string photoFileId, string caption, InlineKeyboardBuilder inline)>
         GetDataForLetter(UserForm userForm, bool removeInline)
     {
         int count = await CountHaveBeenChosen(userForm.UserTelegramId);
         bool hideChoiceButton = count >= AppConstants.MaxChosen; 
         
-        InputOnlineFile iof = await _mediaService.GetUserFormPhoto(userForm) 
+        string photoFileId = userForm.Photo 
                               ?? throw new Exception($"Нет фото [{userForm.Photo}] для пользователя [{userForm.UserTelegramId}]"); // Получаем файл из диска.
 
         var marks = await CountLetterMarks(userForm.UserTelegramId);
@@ -180,10 +177,10 @@ public partial class Main : BaseMysterySantaState
 
         sb.AppendLine($"{r.Like} <b>{marks.Like}</b> {r.Dislike} <b>{marks.Dislike}</b>");
         
-        MarkupBuilder<InlineKeyboardMarkup> inline = r.GetInlineUnderLetterForUser(User, UserClaims, userForm.UserTelegramId,
+        InlineKeyboardBuilder inline = r.GetInlineUnderLetterForUser(User, UserClaims, userForm.UserTelegramId,
             await HasChatExisted(BotClient, userForm.UserTelegramId),true, hideChoiceButton);
 
-        return (iof, sb.ToString(), inline);
+        return (photoFileId, sb.ToString(), inline);
     }
 
     private bool HasUserClaim(string claimName) => UserClaims.Any(uc => uc.Name == claimName);
@@ -228,8 +225,8 @@ public partial class Main : BaseMysterySantaState
 
         var inline = r.GetMyLetterInline(me);
 
-        await BotClient.SendPhotoAsync(Chat.ChatId, data.photo, data.caption,
-            ParseMode.Html, 
+        await BotClient.SendPhotoAsync(Chat.ChatId, data.photoFileId, caption:data.caption,
+            parseMode:ParseMode.Html, 
             replyMarkup: inline.Build());
     }
     

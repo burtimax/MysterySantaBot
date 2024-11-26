@@ -7,7 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Burtimax.TelegramBot.Framework" Version="1.1.2" />
+        <PackageReference Include="FastEndpoints" Version="5.31.0.18-beta" />
+        <PackageReference Include="FastEndpoints.Swagger" Version="5.31.0.18-beta" />
         <PackageReference Include="Mapster" Version="6.5.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.13" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.11">
@@ -25,11 +26,20 @@
         </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.7" />
-        <PackageReference Include="Telegram.Bot" Version="18.0.0" />
+        <PackageReference Include="Telegram.BotAPI" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Database\Migrations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="MultipleBotFramework">
+        <HintPath>..\..\..\!BotFramework\BotFrameworkWithSamples\src\MultipleBotFrameworkEndpoints\bin\Debug\net8.0\MultipleBotFramework.dll</HintPath>
+      </Reference>
+      <Reference Include="MultipleBotFrameworkEndpoints">
+        <HintPath>..\..\..\!BotFramework\BotFrameworkWithSamples\src\MultipleBotFrameworkEndpoints\bin\Debug\net8.0\MultipleBotFrameworkEndpoints.dll</HintPath>
+      </Reference>
     </ItemGroup>
 
 </Project>

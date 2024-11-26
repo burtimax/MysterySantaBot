@@ -1,5 +1,4 @@
-﻿using BotFramework.Other;
-using Telegram.Bot.Types.ReplyMarkups;
+﻿using MultipleBotFramework.Utils.Keyboard;
 
 namespace MysterySantaBot.Resources.Res;
 
@@ -9,5 +8,5 @@ public class SetNameRes
     public string InputName { get; set; }
     public string TooLongName { get; set; }
     
-    public IReplyMarkup PreviousName(string name) => new MarkupBuilder<ReplyKeyboardMarkup>().NewRow().Add(name.ToString()).Build();
+    public ReplyKeyboardBuilder PreviousName(string name) => new ReplyKeyboardBuilder().NewRow().Add(name.ToString()).Build();
 }

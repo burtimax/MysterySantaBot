@@ -1,5 +1,4 @@
-﻿using Telegram.Bot.Types.ReplyMarkups;
-
+﻿
 namespace MysterySantaBot.Resources.Res;
 
 public class SetPhotoRes
